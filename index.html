@@ -1,68 +1,37 @@
-<!DOCTYPE html>
-<html lang="no">
-<head>
-  <meta charset="UTF-8">
-  <title>Skriveverktøy</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-</head>
-<body>
+// Remove keystroke logging and add focus state tracking
+document.addEventListener('focus', handleFocus);
+document.addEventListener('blur', handleBlur);
 
-<h2>Skriv teksten din</h2>
-
-<textarea id="editor" rows="15" cols="80"></textarea>
-<br><br>
-
-<button onclick="finish()">Fullfør</button>
-
-<script>
-let log = [];
-let startTime = Date.now();
-
-// Logg tastetrykk
-document.getElementById("editor").addEventListener("input", (e) => {
-    log.push({
-        type: "input",
-        value: e.target.value,
-        time: Date.now() - startTime
-    });
-});
-
-// Logg fokus ut/inn
-window.addEventListener("blur", () => {
-    log.push({
-        type: "focus_lost",
-        time: Date.now() - startTime
-    });
-});
-
-window.addEventListener("focus", () => {
-    log.push({
-        type: "focus_gained",
-        time: Date.now() - startTime
-    });
-});
-
-// Lag PDF
-function finish() {
-    const { jsPDF } = window.jspdf;
+// PDF generation modifications
+function generatePDF() {
     const doc = new jsPDF();
+    let yPosition = 20;
 
-    let text = document.getElementById("editor").value;
+    // Add content with spacing
+    doc.text('Elevtekst', 10, yPosition);
+    yPosition += 20; // Add 20px spacing
+    doc.text('Aktivitetslogg', 10, yPosition);
+    yPosition += 20; // Spacing after
 
-    doc.text("Elevtekst:", 10, 10);
-    doc.text(text, 10, 20);
+    // Example content for multi-page support
+    const content = 'Your long content here...';
+    const splitContent = doc.splitTextToSize(content, 190);
 
-    let y = 100;
-    doc.text("Logg:", 10, y);
-
-    log.forEach(entry => {
-        y += 10;
-        doc.text(JSON.stringify(entry), 10, y);
+    splitContent.forEach((line, index) => {
+        if (yPosition + 10 > doc.internal.pageSize.height) {
+            doc.addPage();
+            yPosition = 20; // Reset yPosition for new page
+        }
+        doc.text(line, 10, yPosition);
+        yPosition += 10;
     });
 
-    doc.save("besvarelse.pdf");
+doc.save('output.pdf');
 }
-</script>
 
-</body>
-</html>
+function handleFocus(event) {
+    // Handle focus event
+}
+function handleBlur(event) {
+    // Handle blur event
+}
