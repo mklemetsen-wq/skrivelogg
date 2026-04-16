@@ -3,29 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Writing Tool</title>
+    <title>Enhanced Writing Tool</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
 </head>
 <body>
     <header>
-        <h1>Welcome to the Writing Tool</h1>
+        <h1>Enhanced Writing Tool</h1>
+        <button id="darkModeToggle">Toggle Dark Mode</button>
     </header>
     <main>
-        <section>
-            <h2>About</h2>
-            <p>This tool helps you to organize your thoughts and enhance your writing process.</p>
-        </section>
-        <section>
-            <h2>Features</h2>
-            <ul>
-                <li>Document Outline</li>
-                <li>Word Count</li>
-                <li>Grammar and Spell Check</li>
-                <li>Cloud Save</li>
-            </ul>
-        </section>
-        <footer>
-            <p>Current Date and Time: 2026-04-16 08:56:00 UTC</p>
-        </footer>
+        <textarea id="editor" placeholder="Start writing here..."></textarea>
+        <div id="statistics">
+            <p>Word Count: <span id="wordCount">0</span></p>
+            <p>Character Count: <span id="charCount">0</span></p>
+            <p>Timer: <span id="timer">00:00</span></p>
+        </div>
     </main>
+    <footer>
+        <button id="saveButton">Auto-Save</button>
+        <button id="exportButton">Export as PDF</button>
+    </footer>
+    <script>
+        const editor = document.getElementById('editor');
+        const wordCountDisplay = document.getElementById('wordCount');
+        const charCountDisplay = document.getElementById('charCount');
+        const timerDisplay = document.getElementById('timer');
+        const saveButton = document.getElementById('saveButton');
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        let timer;
+        let seconds = 0;
+
+        // Update word and character count
+        editor.addEventListener('input', () => {
+            const text = editor.value;
+            wordCountDisplay.innerText = text.split(/\\s+/).filter(word => word.length > 0).length;
+            charCountDisplay.innerText = text.length;
+        });
+
+        // Timer functionality
+        function updateTimer() {
+            seconds++;
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            timerDisplay.innerText = `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        setInterval(updateTimer, 1000);
+
+        // Auto-save functionality
+        saveButton.addEventListener('click', () => {
+            localStorage.setItem('latestDraft', editor.value);
+            alert('Draft saved!');
+        });
+
+        // Load latest draft
+        window.onload = () => {
+            const latestDraft = localStorage.getItem('latestDraft');
+            if (latestDraft) {
+                editor.value = latestDraft;
+            }
+        };
+
+        // Dark mode toggle
+        darkModeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
+
+        // PDF Export - simplistic approach
+        exportButton.addEventListener('click', () => {
+            const pdfContent = editor.value;
+            const blob = new Blob([pdfContent], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'draft.pdf';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+    </script>
 </body>
 </html>
