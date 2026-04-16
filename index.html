@@ -1,1 +1,68 @@
-<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>PDF Export Example</title>\n    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>\n</head>\n<body>\n    <h1>Export PDF Example</h1>\n    <button id="download">Download PDF</button>\n    <script>\n        document.getElementById('download').addEventListener('click', function() {\n            const { jsPDF } = window.jspdf;\n            const doc = new jsPDF();\n            doc.text('Hello world!', 10, 10);\n            doc.save('sample.pdf');\n        });\n    <\/script>\n</body>\n</html>
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <title>Skriveverktøy</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+<h2>Skriv teksten din</h2>
+
+<textarea id="editor" rows="15" cols="80"></textarea>
+<br><br>
+
+<button onclick="finish()">Fullfør</button>
+
+<script>
+let log = [];
+let startTime = Date.now();
+
+// Logg tastetrykk
+document.getElementById("editor").addEventListener("input", (e) => {
+    log.push({
+        type: "input",
+        value: e.target.value,
+        time: Date.now() - startTime
+    });
+});
+
+// Logg fokus ut/inn
+window.addEventListener("blur", () => {
+    log.push({
+        type: "focus_lost",
+        time: Date.now() - startTime
+    });
+});
+
+window.addEventListener("focus", () => {
+    log.push({
+        type: "focus_gained",
+        time: Date.now() - startTime
+    });
+});
+
+// Lag PDF
+function finish() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    let text = document.getElementById("editor").value;
+
+    doc.text("Elevtekst:", 10, 10);
+    doc.text(text, 10, 20);
+
+    let y = 100;
+    doc.text("Logg:", 10, y);
+
+    log.forEach(entry => {
+        y += 10;
+        doc.text(JSON.stringify(entry), 10, y);
+    });
+
+    doc.save("besvarelse.pdf");
+}
+</script>
+
+</body>
+</html>
